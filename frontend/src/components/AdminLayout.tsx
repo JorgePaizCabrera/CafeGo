@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar, { NAV_SECTIONS } from './Sidebar'
 import { MobileTabBar, MobileTopBar } from './MobileNav'
+import { useActualizacionAutomatica } from '../store/actualizacion'
 
 function useSectionTitle(): string {
   const { pathname } = useLocation()
@@ -13,6 +14,7 @@ function useSectionTitle(): string {
 }
 
 export default function AdminLayout() {
+  useActualizacionAutomatica()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const title = useSectionTitle()
   const { pathname } = useLocation()

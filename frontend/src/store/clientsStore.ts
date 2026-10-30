@@ -23,7 +23,11 @@ let clients: Client[] = []
 let loaded = false
 let loadingPromise: Promise<void> | null = null
 
+// Si los datos cambian mientras llega una recarga en segundo plano, esa respuesta ya viene atrasada y se descarta.
+let version = 0
+
 function notify() {
+  version++
   listeners.forEach(l => l())
 }
 
@@ -55,6 +59,15 @@ export function ensureClientsLoaded(): Promise<void> {
       })
   }
   return loadingPromise
+}
+
+export async function recargarClientes(): Promise<void> {
+  if (!loaded) return
+  const vista = version
+  const rows = await apiFetch<ClienteDto[]>('/api/clientes')
+  if (vista !== version) return
+  clients = rows.map(fromDto)
+  notify()
 }
 
 export function getClients(): Client[] {

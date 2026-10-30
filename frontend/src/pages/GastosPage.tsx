@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, Coffee, Loader2, Package, Wallet } from 'lucide-react'
+import { alActualizarDatos } from '../store/actualizacion'
 import { fetchGastos, type GastoItem, type GastosResumen } from '../store/inventoryStore'
 import { errorMessage } from '../components/ui/feedback'
 import { formatPeriod, periodPhrase, periodRange, todayISODate } from '../utils/dates'
@@ -22,7 +23,14 @@ export default function GastosPage() {
       .then(r => { if (!cancelled) setData(r) })
       .catch(err => { if (!cancelled) setError(errorMessage(err, 'No se pudieron cargar los gastos.')) })
       .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+    // Las recargas en segundo plano no muestran el indicador de carga ni los errores pasajeros.
+    const dejarDeEscuchar = alActualizarDatos(() => {
+      fetchGastos(desde, hasta).then(r => { if (!cancelled) setData(r) }).catch(() => {})
+    })
+    return () => {
+      cancelled = true
+      dejarDeEscuchar()
+    }
   }, [periodo])
 
   const materia = data?.items.filter(i => i.categoria === 'materia_prima') ?? []

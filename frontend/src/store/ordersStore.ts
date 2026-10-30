@@ -145,7 +145,11 @@ let orders: Order[] = []
 let loaded = false
 let loadingPromise: Promise<void> | null = null
 
+// Si los datos cambian mientras llega una recarga en segundo plano, esa respuesta ya viene atrasada y se descarta.
+let version = 0
+
 function notify() {
+  version++
   listeners.forEach(l => l())
 }
 
@@ -197,6 +201,15 @@ export function ensureOrdersLoaded(): Promise<void> {
       })
   }
   return loadingPromise
+}
+
+export async function recargarOrdenes(): Promise<void> {
+  if (!loaded) return
+  const vista = version
+  const rows = await apiFetch<OrdenDto[]>('/api/ordenes')
+  if (vista !== version) return
+  orders = rows.map(fromDto)
+  notify()
 }
 
 export function getOrders(): Order[] {

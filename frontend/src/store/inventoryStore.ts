@@ -194,11 +194,16 @@ let productoEmpacado: ProductoEmpacado = { comercial: 0, especial: 0, sueltoGram
 let loaded = false
 let loadingPromise: Promise<void> | null = null
 
+// Si los datos cambian mientras llega una recarga en segundo plano, esa respuesta ya viene atrasada y se descarta.
+let version = 0
+
 function notify() {
+  version++
   listeners.forEach(l => l())
 }
 
-async function refresh(): Promise<void> {
+async function refresh(descartarSiCambia = false): Promise<void> {
+  const vista = version
   const [stockRows, movRows, empaqueStockRows, empaqueMovRows, empacadoRow, granoUmbral] = await Promise.all([
     apiFetch<StockDto[]>('/api/inventario/stock'),
     apiFetch<MovimientoDto[]>('/api/inventario/movimientos'),
@@ -207,6 +212,7 @@ async function refresh(): Promise<void> {
     apiFetch<ProductoEmpacado>('/api/inventario/empacado'),
     apiFetch<{ minimoLb: number }>('/api/inventario/grano-cafeteria/umbral'),
   ])
+  if (descartarSiCambia && vista !== version) return
   state = buildState(stockRows)
   state.thresholds.granoCafeteria = granoUmbral.minimoLb
   movements = movRows.map(fromMovementDto)
@@ -249,6 +255,10 @@ export function ensureInventoryLoaded(): Promise<void> {
 export async function refreshInventory(): Promise<void> {
   await refresh()
   loaded = true
+}
+
+export async function recargarInventario(): Promise<void> {
+  if (loaded) await refresh(true)
 }
 
 export function useInventory(): InventoryState {

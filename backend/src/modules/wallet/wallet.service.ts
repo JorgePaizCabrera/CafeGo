@@ -69,7 +69,7 @@ function objetoPedido(orden: Orden) {
     cardTitle: texto('Go Café'),
     subheader: texto(`Orden ${orderNo}`),
     header: texto(paso.titulo),
-    ...(urlPublica() && { logo: { sourceUri: { uri: `${env.publicUrl}/images/cafelogo.jpg` } } }),
+    ...(urlPublica() && { logo: { sourceUri: { uri: `${env.publicUrl}/icons/icon-512.png` } } }),
     textModulesData: [
       { id: 'avance', header: listo ? 'Estado' : `Paso ${numero} de ${ORDEN_PASOS.length}`, body: paso.detalle },
       { id: 'entrega', header: 'Entrega estimada', body: FECHA.format(orden.estimatedDate) },

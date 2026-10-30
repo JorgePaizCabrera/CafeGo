@@ -10,4 +10,4 @@ Los clientes pueden seguir el avance de su pedido desde el celular con un enlace
 
 ---
 
-Desarrollado por **Jorge Paiz**.
+Desarrollado por Jorge Paiz y Daniel Rodas.

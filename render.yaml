@@ -1,0 +1,40 @@
+# Despliegue en Render (plan gratis): un solo servicio que sirve la API y el frontend.
+# La base de datos está en Supabase. Los valores marcados con sync: false se escriben
+# a mano en el panel de Render (nunca en este archivo ni en GitHub).
+services:
+  - type: web
+    name: gocafe
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: >-
+      cd frontend && npm ci --include=dev && npm run build &&
+      cd ../backend && npm ci --include=dev && npm run build
+    # Aplica las migraciones pendientes y asegura el usuario admin antes de arrancar.
+    startCommand: cd backend && npx prisma migrate deploy && npm run seed && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: STATIC_DIR
+        value: ../frontend/dist
+      # Cadena "Session pooler" de Supabase (puerto 5432), con ?connection_limit=5 al final.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      # Dirección pública del servicio, p. ej. https://gocafe.onrender.com
+      - key: PUBLIC_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SEED_USERNAME
+        sync: false
+      - key: SEED_PASSWORD
+        sync: false
+      - key: GOOGLE_WALLET_ISSUER_ID
+        value: "3388000000023232314"
+      # Contenido completo del archivo JSON de la cuenta de servicio.
+      - key: GOOGLE_WALLET_CREDENTIALS
+        sync: false

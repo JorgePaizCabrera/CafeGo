@@ -1,0 +1,303 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CoffeeType {
+  pergamino
+  natural
+  oro
+}
+
+enum OrderStatus {
+  Recibido       @map("Recibido")
+  EnPreparacion  @map("En preparación")
+  EnTueste       @map("En tueste")
+  EnMolienda     @map("En molienda")
+  EnEmpaque      @map("En empaque")
+  Finalizado     @map("Finalizado")
+}
+
+enum ProductionStatus {
+  en_proceso
+  terminada
+}
+
+enum RoastType {
+  claro
+  medio
+  oscuro
+}
+
+enum SegundaType {
+  oro
+  natural
+}
+
+enum MovementKind {
+  entrada
+  salida
+}
+
+enum ReferenciaTipo {
+  produccion_gourmet
+  produccion_blend
+  orden
+  manual
+}
+
+model Cliente {
+  id        String   @id @default(uuid())
+  nombre    String
+  ciudad    String
+  telefono  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  ordenes Orden[]
+
+  @@map("clientes")
+}
+
+model Orden {
+  id  String @id @default(uuid())
+  seq Int    @unique @default(autoincrement())
+
+  clienteId String  @map("client_id")
+  cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  receivedDate  DateTime @map("received_date") @db.Date
+  estimatedDate DateTime @map("estimated_date") @db.Date
+
+  coffeeType      CoffeeType
+  initialWeight   Decimal    @map("initial_weight") @db.Decimal(10, 2)
+  humidity        Decimal    @db.Decimal(5, 2)
+  cleaningWeight  Decimal    @default(0) @map("cleaning_weight") @db.Decimal(10, 2)
+  threshingWeight Decimal    @default(0) @map("threshing_weight") @db.Decimal(10, 2)
+  finalWeight     Decimal    @default(0) @map("final_weight") @db.Decimal(10, 2)
+
+  roastType String @map("roast_type")
+  grindType String @map("grind_type")
+
+  totalPrice Decimal @default(0) @map("total_price") @db.Decimal(10, 2)
+  pagado     Boolean @default(false)
+  pagadoAt   DateTime? @map("pagado_at")
+
+  bagSizeGrams         Decimal @default(350) @map("bag_size_grams") @db.Decimal(10, 2)
+  actualFullBags       Int     @default(0) @map("actual_full_bags")
+  actualRemainderGrams Decimal @default(0) @map("actual_remainder_grams") @db.Decimal(10, 2)
+
+  packageAllocation     Json   @default("{}") @map("package_allocation")
+  incompletePackageType String @map("incomplete_package_type")
+
+  status          OrderStatus
+  currentStepName String      @map("current_step_name")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  finalizedAt DateTime? @map("finalized_at")
+
+  // Identificador público y no adivinable del enlace de seguimiento que se comparte con el cliente.
+  seguimientoToken String @unique @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @map("seguimiento_token")
+  // El enlace solo funciona si el admin decidió enviárselo al cliente al crear la orden.
+  seguimientoActivo Boolean @default(false) @map("seguimiento_activo")
+
+  roasts OrdenTueste[]
+
+  @@index([clienteId])
+  @@map("ordenes")
+}
+
+model OrdenTueste {
+  id      String @id @default(uuid())
+  ordenId String @map("order_id")
+  orden   Orden  @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  seq     Int
+
+  weightLb Decimal @map("weight_lb") @db.Decimal(10, 2)
+
+  initialTemp        Decimal @map("initial_temp") @db.Decimal(6, 2)
+  returnTemp         Decimal @map("return_temp") @db.Decimal(6, 2)
+  returnTime         String  @map("return_time")
+  dehydrationTemp    Decimal @map("dehydration_temp") @db.Decimal(6, 2)
+  dehydrationTime    String  @map("dehydration_time")
+  caramelizationTemp Decimal @map("caramelization_temp") @db.Decimal(6, 2)
+  caramelizationTime String  @map("caramelization_time")
+  crackTemp          Decimal @map("crack_temp") @db.Decimal(6, 2)
+  crackTime          String  @map("crack_time")
+  finalTemp          Decimal @map("final_temp") @db.Decimal(6, 2)
+  finalTime          String  @map("final_time")
+
+  notes String @default("")
+
+  @@unique([ordenId, seq])
+  @@map("orden_tuestes")
+}
+
+model ProduccionGourmet {
+  id  String @id @default(uuid())
+  seq Int    @unique @default(autoincrement())
+
+  status          ProductionStatus @default(en_proceso)
+  currentStepName String           @map("current_step_name")
+  fecha           DateTime         @db.Date
+
+  pergaminoUsedLb    Decimal   @map("pergamino_used_lb") @db.Decimal(10, 2)
+  trilladoWeightLb   Decimal   @default(0) @map("trillado_weight_lb") @db.Decimal(10, 2)
+  roastType          RoastType @default(medio) @map("roast_type")
+  pesoTuesteResultLb Decimal   @default(0) @map("peso_tueste_result_lb") @db.Decimal(10, 2)
+  reservaCafeteriaLb Decimal   @default(0) @map("reserva_cafeteria_lb") @db.Decimal(10, 2)
+  molidoWeightLb     Decimal   @default(0) @map("molido_weight_lb") @db.Decimal(10, 2)
+  actualFullBags       Int     @default(0) @map("actual_full_bags")
+  actualRemainderGrams Decimal @default(0) @map("actual_remainder_grams") @db.Decimal(10, 2)
+  comercialBags Int @default(0) @map("comercial_bags")
+  especialBags  Int @default(0) @map("especial_bags")
+
+  notas String @default("")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  finalizedAt DateTime? @map("finalized_at")
+
+  roasts ProduccionGourmetTueste[]
+
+  @@map("producciones_gourmet")
+}
+
+model ProduccionGourmetTueste {
+  id           String            @id @default(uuid())
+  produccionId String            @map("produccion_id")
+  produccion   ProduccionGourmet @relation(fields: [produccionId], references: [id], onDelete: Cascade)
+  seq          Int
+
+  weightLb Decimal @map("weight_lb") @db.Decimal(10, 2)
+  notes    String  @default("")
+
+  @@unique([produccionId, seq])
+  @@map("producciones_gourmet_tuestes")
+}
+
+model ProduccionBlend {
+  id  String @id @default(uuid())
+  seq Int    @unique @default(autoincrement())
+
+  status          ProductionStatus @default(en_proceso)
+  currentStepName String           @map("current_step_name")
+  fecha           DateTime         @db.Date
+
+  cantidadPlanificadaLb Decimal     @map("cantidad_planificada_lb") @db.Decimal(10, 2)
+  segundaType           SegundaType @map("segunda_type")
+  pergaminoUsedLb       Decimal     @map("pergamino_used_lb") @db.Decimal(10, 2)
+  segundaUsedLb         Decimal     @map("segunda_used_lb") @db.Decimal(10, 2)
+  trilladoWeightLb      Decimal     @default(0) @map("trillado_weight_lb") @db.Decimal(10, 2)
+  pesoTuesteResultLb    Decimal     @default(0) @map("peso_tueste_result_lb") @db.Decimal(10, 2)
+  molidoMezclaWeightLb  Decimal     @default(0) @map("molido_mezcla_weight_lb") @db.Decimal(10, 2)
+  actualFullBags        Int         @default(0) @map("actual_full_bags")
+  actualRemainderGrams  Decimal     @default(0) @map("actual_remainder_grams") @db.Decimal(10, 2)
+
+  notas String @default("")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  finalizedAt DateTime? @map("finalized_at")
+
+  roasts ProduccionBlendTueste[]
+
+  @@map("producciones_blend")
+}
+
+model ProduccionBlendTueste {
+  id           String          @id @default(uuid())
+  produccionId String          @map("produccion_id")
+  produccion   ProduccionBlend @relation(fields: [produccionId], references: [id], onDelete: Cascade)
+  seq          Int
+
+  weightLb Decimal @map("weight_lb") @db.Decimal(10, 2)
+  notes    String  @default("")
+
+  @@unique([produccionId, seq])
+  @@map("producciones_blend_tuestes")
+}
+
+model InventarioStock {
+  material   String   @id
+  cantidadLb Decimal  @default(0) @map("cantidad_lb") @db.Decimal(10, 2)
+  minimoLb   Decimal? @map("minimo_lb") @db.Decimal(10, 2)
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("inventario_stock")
+}
+
+model InventarioMovimiento {
+  id              String          @id @default(uuid())
+  fecha           DateTime        @default(now())
+  material        String
+  tipo            MovementKind
+  cantidadLb      Decimal         @map("cantidad_lb") @db.Decimal(10, 2)
+  motivo          String
+  referenciaTipo  ReferenciaTipo? @map("referencia_tipo")
+  referenciaId    String?         @map("referencia_id")
+  saldoResultante Decimal         @map("saldo_resultante") @db.Decimal(10, 2)
+  costoTotal      Decimal?        @map("costo_total") @db.Decimal(12, 2)
+  costoCorregidoAt DateTime?      @map("costo_corregido_at")
+
+  @@index([material, fecha])
+  @@map("inventario_movimientos")
+}
+
+/// Bolsas llenas de producto terminado por tipo: comercial, especial (Gourmet) y blend.
+model InventarioProductoEmpacado {
+  tipoBolsa String   @id @map("tipo_bolsa")
+  bolsas    Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("inventario_producto_empacado")
+}
+
+model InventarioEmpaqueStock {
+  tipo      String   @id
+  cantidad  Int      @default(0)
+  minimo    Int?
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("inventario_empaque_stock")
+}
+
+model InventarioEmpaqueMovimiento {
+  id              String          @id @default(uuid())
+  fecha           DateTime        @default(now())
+  tipoEmpaque     String          @map("tipo_empaque")
+  tipo            MovementKind
+  cantidad        Int
+  motivo          String
+  referenciaTipo  ReferenciaTipo? @map("referencia_tipo")
+  referenciaId    String?         @map("referencia_id")
+  saldoResultante Int             @map("saldo_resultante")
+  costoTotal      Decimal?        @map("costo_total") @db.Decimal(12, 2)
+  costoCorregidoAt DateTime?      @map("costo_corregido_at")
+
+  @@index([tipoEmpaque, fecha])
+  @@map("inventario_empaque_movimientos")
+}
+
+model Configuracion {
+  clave     String   @id
+  valor     Decimal  @db.Decimal(10, 2)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("configuracion")
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("usuarios")
+}

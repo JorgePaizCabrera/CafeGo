@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.test.example
+
+# Claves privadas (Google Wallet): nunca se suben al repositorio
+secrets/

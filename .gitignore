@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+
+gocafe_frontend.zip
+interfaz.png
+diseño.png
+cafes.jpg
+
+__pycache__/

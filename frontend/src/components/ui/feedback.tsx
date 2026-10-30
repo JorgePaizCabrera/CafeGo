@@ -10,6 +10,7 @@ interface ConfirmOptions {
   confirmLabel?: string
   cancelLabel?: string
   danger?: boolean
+  soloConfirmar?: boolean
 }
 interface ConfirmRequest extends ConfirmOptions { resolve: (ok: boolean) => void }
 
@@ -108,7 +109,7 @@ function ConfirmModal({ request }: { request: ConfirmRequest }) {
           </div>
         </div>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button ref={cancelRef} type="button" className="btn-secondary" onClick={() => closeConfirm(false)}>{request.cancelLabel ?? 'Cancelar'}</button>
+          {!request.soloConfirmar && <button ref={cancelRef} type="button" className="btn-secondary" onClick={() => closeConfirm(false)}>{request.cancelLabel ?? 'Cancelar'}</button>}
           <button ref={confirmRef} type="button" className={request.danger ? 'btn-danger' : 'btn-primary'} onClick={() => closeConfirm(true)}>{request.confirmLabel ?? 'Confirmar'}</button>
         </div>
       </div>

@@ -1,6 +1,7 @@
-import { Coffee, LayoutDashboard, LogOut, ReceiptText, Users, Wallet, Warehouse } from 'lucide-react'
+import { Coffee, Download, LayoutDashboard, LogOut, ReceiptText, Users, Wallet, Warehouse } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { logout } from '../store/authStore'
+import { instalarApp, puedeInstalarse } from '../utils/instalarApp'
 
 interface NavItem { to: string, label: string, icon: typeof Users }
 
@@ -88,6 +89,16 @@ export default function Sidebar({ open, onClose }: { open: boolean, onClose: () 
         </nav>
 
         <div className="relative border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {puedeInstalarse() && (
+            <button
+              type="button"
+              onClick={() => { onClose(); void instalarApp() }}
+              title="Instalar Go Café en este dispositivo"
+              className="mb-1 flex w-full items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-medium text-stone-500 transition hover:bg-white/5 hover:text-stone-300"
+            >
+              <Download size={14} /> App
+            </button>
+          )}
           <button onClick={handleLogout} className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-semibold text-stone-400 transition hover:bg-red-500/10 hover:text-red-300">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 transition group-hover:bg-red-500/15"><LogOut size={18} /></span>
             Cerrar sesión

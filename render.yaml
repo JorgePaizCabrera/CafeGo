@@ -6,7 +6,7 @@ services:
     name: gocafe
     runtime: node
     plan: free
-    region: oregon
+    region: virginia
     branch: main
     buildCommand: >-
       cd frontend && npm ci --include=dev && npm run build &&

@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma'
 import { NotFoundError } from '../../errors'
 import { formatFolio } from '../../utils/folio'
+import { env } from '../../env'
 import * as walletService from '../wallet/wallet.service'
 
 const TOKEN_FORMATO = /^[0-9a-f]{32}$/
@@ -27,7 +28,7 @@ export async function getSeguimiento(token: string) {
     status: orden.status,
     finalizedAt: orden.finalizedAt,
     updatedAt: orden.updatedAt,
-    wallet: walletService.walletHabilitado(),
+    wallet: env.walletBoton && walletService.walletHabilitado(),
   }
 }
 

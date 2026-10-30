@@ -33,6 +33,9 @@ services:
         sync: false
       - key: SEED_PASSWORD
         sync: false
+      # "no" oculta el botón de Google Wallet hasta que Google apruebe el acceso de publicación; luego "si".
+      - key: GOOGLE_WALLET_BOTON
+        value: "no"
       - key: GOOGLE_WALLET_ISSUER_ID
         value: "3388000000023232314"
       # Contenido completo del archivo JSON de la cuenta de servicio.

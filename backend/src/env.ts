@@ -21,4 +21,7 @@ export const env = {
   walletIssuerId: process.env.GOOGLE_WALLET_ISSUER_ID || '',
   walletKeyFile: process.env.GOOGLE_WALLET_KEY_FILE || '',
   walletCredentials: process.env.GOOGLE_WALLET_CREDENTIALS || '',
+  // Mientras Google no aprueba el acceso de publicación, solo las cuentas de prueba pueden guardar
+  // la tarjeta: con "no" se oculta el botón a los clientes (las tarjetas ya guardadas se siguen actualizando).
+  walletBoton: process.env.GOOGLE_WALLET_BOTON !== 'no',
 }

@@ -19,6 +19,8 @@ button, input, select, textarea { font: inherit; }
   .stat-value { @apply text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl; }
   .label { @apply mb-1.5 block text-sm font-medium text-stone-700; }
   .input { @apply w-full resize-none rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base outline-none transition placeholder:text-stone-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-500 sm:text-sm; }
+  /* El autocompletado del navegador pinta el campo de claro y taparía el vidrio del login. */
+  .input-vidrio:-webkit-autofill { -webkit-text-fill-color: #fff; caret-color: #fff; transition: background-color 9999s; }
   .select { @apply w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-base outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-500 sm:text-sm; }
   .btn-primary { @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-stone-950 shadow-sm transition hover:bg-amber-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100; }
   .btn-secondary { @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-400/25 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100; }
